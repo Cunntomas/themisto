@@ -6,7 +6,8 @@ async function scrapper(provider, query) {
     const webSelectors = {
         inputSelector: '.nav-search-input',
         resultsSelector: '#searchResults  li.results-item',
-        categorySelector: '#id_category > dd > h3 > a',
+        categorySelector1: '#inner-main > aside > div.breadcrumb > ol li a',
+        categorySelector2: '#id_category > dd > h3 > a',
         itemSelector: 'div.rowItem.item',
         itemImageSelector: 'a.item-image > img',
         itemNameSelector: 'span.main-title',
@@ -30,11 +31,16 @@ async function scrapper(provider, query) {
 
         const productListResults = await page.evaluate((selectors, attributes) => {
             let results = [...document.querySelectorAll(selectors.resultsSelector)];
-            let categoryID = document.querySelector(selectors.categorySelector).getAttribute(attributes.title);
+            let categoryID = document.querySelector(selectors.categorySelector1) || document.querySelector(selectors.categorySelector2);
+            if(categoryID) {
+                categoryID = categoryID.getAttribute(attributes.title) || '';
+            } else {
+                categoryID = 'uncategorized';
+            }
             let resultsList = results.map((result) => {
                 let item = result.querySelector(selectors.itemSelector);
                 let SKU = item.getAttribute(attributes.skuAttribute);
-                let itemImageURL = item.querySelector(selectors.itemImageSelector).getAttribute(attributes.imgUrl);
+                let itemImageURL = item.querySelector(selectors.itemImageSelector) ? item.querySelector(selectors.itemImageSelector).getAttribute(attributes.imgUrl) : '';
                 let itemName = item.querySelector(selectors.itemNameSelector).innerHTML;
                 let itemPrice = item.querySelector(selectors.itemPriceSelector).innerHTML;
 
@@ -49,16 +55,15 @@ async function scrapper(provider, query) {
             return resultsList;
         }, webSelectors, webAttributes);
 
-        console.log(productListResults);
         await page.close();
         await browser.close();
         return productListResults;
     } catch(error) {
-        console.log(error);
+        console.info(error);
         return error;
     }
 }
 
-scrapper('https://www.mercadolibre.com.ar/', 'joystick');
+// scrapper('https://www.mercadolibre.com.ar/', 'zapatillas');
 
-// modules.export = scrapper;
+module.exports = scrapper;

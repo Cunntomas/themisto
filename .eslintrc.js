@@ -144,7 +144,6 @@ module.exports = {
       "handle-callback-err": 1,
       "no-new-require": 2,
       "no-path-concat": 2,
-      "no-process-exit": 1,
       "no-sync": 1,
       "array-bracket-spacing": [2,"never",{}]
     },
